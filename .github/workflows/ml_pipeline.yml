@@ -104,8 +104,8 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         with:
           args: >
-            -Dsonar.projectKey=HealthCheck
-            -Dsonar.organization=tu-org
+            -Dsonar.projectKey=Ivan-Cepeda_HealthCheck-MLOps-CI-CD-Pipeline
+            -Dsonar.organization=ivan-cepeda
             -Dsonar.sources=src
             -Dsonar.python.coverage.reportPaths=coverage.xml
 """
