@@ -1,0 +1,111 @@
+name: HealthCheck ML Pipeline
+
+# TRIGGERS: push, pull_request, schedule
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'src/**'
+      - 'model/**'
+
+  pull_request:
+    branches: [main]
+    types: [opened, synchronize]
+
+  schedule:
+    - cron: '0 2 * * 0'  # Domingos 2:00 AM para monitoreo
+
+env:
+  PYTHON_VERSION: '3.10'
+
+jobs:
+  # JOB 1: Tests automáticos (disparado por push y PR)
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout del repositorio
+        uses: actions/checkout@v3
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Instalar dependencias
+        run: |
+          pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pytest
+
+      - name: Ejecutar tests de inferencia
+        run: pytest src/inference.py -v
+
+  # JOB 2: Monitoreo de drift (solo para schedule)
+  monitor:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'schedule'
+    steps:
+      - name: Checkout del repositorio
+        uses: actions/checkout@v3
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Ejecutar monitoreo de drift
+        run: python src/model_monitoring.py
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+
+      - name: Subir reporte de drift
+        uses: actions/upload-artifact@v3
+        with:
+          name: drift-report
+          path: drift_report.json
+
+  # JOB 3: Despliegue (solo en push a main, después de tests exitosos)
+  deploy:
+    runs-on: ubuntu-latest
+    needs: test
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    steps:
+      - name: Checkout del repositorio
+        uses: actions/checkout@v3
+
+      - name: Build Docker image
+        run: docker build -t healthcheck-model:latest .
+
+      - name: Push to ECR
+        run: |
+          aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin $ECR_REGISTRY
+          docker tag healthcheck-model:latest $ECR_REGISTRY/healthcheck:latest
+          docker push $ECR_REGISTRY/healthcheck:latest
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          ECR_REGISTRY: ${{ secrets.ECR_REGISTRY }}
+
+  # JOB 4: Quality Gates con SonarCloud
+  quality:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    steps:
+      - name: Checkout del repositorio
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0  # Full history for better analysis
+
+      - name: SonarCloud Scan
+        uses: SonarSource/sonarcloud-github-action@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        with:
+          args: >
+            -Dsonar.projectKey=HealthCheck
+            -Dsonar.organization=tu-org
+            -Dsonar.sources=src
+            -Dsonar.python.coverage.reportPaths=coverage.xml
+"""

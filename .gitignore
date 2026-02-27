@@ -1,0 +1,12 @@
+# Entornos virtuales
+venv/
+.env
+
+# Datos y Modelos (Los modelos en producción suelen ir a un bucket de S3, no a Git)
+data/*.csv
+data/*.json
+# model/*.pkl # (Descomenta esto si tu modelo pesa más de 50MB)
+
+# Archivos temporales de Python
+__pycache__/
+.pytest_cache/
