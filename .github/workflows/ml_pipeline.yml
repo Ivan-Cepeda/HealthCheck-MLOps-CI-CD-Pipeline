@@ -108,4 +108,4 @@ jobs:
             -Dsonar.organization=ivan-cepeda
             -Dsonar.sources=src
             -Dsonar.python.coverage.reportPaths=coverage.xml
-"""
+
