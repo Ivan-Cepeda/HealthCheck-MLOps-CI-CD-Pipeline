@@ -1,6 +1,6 @@
 import pandas as pd
 import pickle
-
+#Función de predecir
 def predict_risk(data: dict):
     with open("model/health_risk_model.pkl", "rb") as f:
         model = pickle.load(f)
