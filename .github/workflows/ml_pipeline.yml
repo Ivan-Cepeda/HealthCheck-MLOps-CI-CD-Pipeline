@@ -38,7 +38,7 @@ jobs:
           pip install pytest
 
       - name: Ejecutar tests de inferencia
-        run: pytest src/inference.py -v
+        run: pytest src/ -v
 
   # JOB 2: Monitoreo de drift (solo para schedule)
   monitor:
