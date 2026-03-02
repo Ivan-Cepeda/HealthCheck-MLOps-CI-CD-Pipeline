@@ -3,7 +3,7 @@ import pickle
 import os
 import logging
 
-# Configuramos un registro básico para saber qué ocurre en producción----
+# Configuramos un registro básico para saber qué ocurre en producción-----
 logging.basicConfig(level=logging.INFO)
 
 # PASO A: Cargar el modelo de forma global
