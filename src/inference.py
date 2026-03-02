@@ -34,7 +34,7 @@ def predict_risk(data: dict) -> dict:
     
     # Si la edad viene en los datos y es menor a 0, lanzamos el ValueError que el test espera
     if "age" in data and data["age"] < 0:
-        raise ValueError("La edad no puede ser un valor negativo.")
+        raise ValueError("Invalid input: 'age' cannot be a negative value.")
 
     try:
         # 2. Transformación de datos
