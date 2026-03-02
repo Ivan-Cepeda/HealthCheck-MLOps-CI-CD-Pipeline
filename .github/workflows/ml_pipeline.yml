@@ -79,7 +79,7 @@ jobs:
 
       - name: Push to ECR
         run: |
-          aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin $ECR_REGISTRY
+          aws ecr get-login-password --region us-east-2 | docker login --username AWS --password-stdin $ECR_REGISTRY
           docker tag healthcheck-model:latest $ECR_REGISTRY/healthcheck:latest
           docker push $ECR_REGISTRY/healthcheck:latest
         env:
