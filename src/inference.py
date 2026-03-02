@@ -3,7 +3,7 @@ import pickle
 import os
 import logging
 
-# Configuramos un registro básico para saber qué ocurre en producción
+# Configuramos un registro básico para saber qué ocurre en producción--
 logging.basicConfig(level=logging.INFO)
 
 # PASO A: Cargar el modelo de forma global
@@ -31,6 +31,10 @@ def predict_risk(data: dict) -> dict:
     
     if not data:
         return {"error": "No se proporcionaron datos para la predicción."}
+    
+    # Si la edad viene en los datos y es menor a 0, lanzamos el ValueError que el test espera
+    if "age" in data and data["age"] < 0:
+        raise ValueError("La edad no puede ser un valor negativo.")
 
     try:
         # 2. Transformación de datos
