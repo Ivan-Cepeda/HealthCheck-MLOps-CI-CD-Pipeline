@@ -1,6 +1,7 @@
 import pytest
 from inference import predict_risk
 
+#Función de test
 def test_predict_risk():
     """
     Test que valida que el modelo responde correctamente
